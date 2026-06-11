@@ -30,7 +30,31 @@ export default function App() {
     try {
       const stored = localStorage.getItem('apply_tracker_settings');
       if (stored) {
-        setSettings(JSON.parse(stored));
+        const parsed = JSON.parse(stored) as AppSettings;
+        const newChannels = [
+          "https://t.me/offcampussdrive",
+          "https://t.me/jobs_and_internships_updates"
+        ];
+        let updated = false;
+        
+        if (!parsed.channels) {
+          parsed.channels = [...DEFAULT_SETTINGS.channels];
+          updated = true;
+        } else {
+          for (const ch of newChannels) {
+            if (!parsed.channels.includes(ch)) {
+              parsed.channels.push(ch);
+              updated = true;
+            }
+          }
+        }
+        
+        if (updated) {
+          localStorage.setItem('apply_tracker_settings', JSON.stringify(parsed));
+          setSettings(parsed);
+        } else {
+          setSettings(parsed);
+        }
       }
     } catch (e) {
       console.error('Failed to parse settings from localStorage', e);
