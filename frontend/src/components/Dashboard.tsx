@@ -195,6 +195,13 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Applied'>('All');
   const [scrapeTimeframe, setScrapeTimeframe] = useState('24h');
   const [currentQuote, setCurrentQuote] = useState(getRandomQuote);
+
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(() => {
+    return localStorage.getItem('apply_tracker_feedback_submitted') === 'true';
+  });
+  const [feedbackSnoozed, setFeedbackSnoozed] = useState<boolean>(false);
+  const [rating, setRating] = useState<number>(0);
+  const [comment, setComment] = useState<string>('');
   
   const [promptOpen, setPromptOpen] = useState(false);
   const [pendingLinkToMark, setPendingLinkToMark] = useState<ScrapedLink | null>(null);
@@ -429,10 +436,82 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
         {currentQuote && (
           <div className="glass-panel p-5 rounded-2xl border border-slate-800/60 text-center relative overflow-hidden bg-slate-900/20 glow-indigo animate-fade-in flex flex-col justify-center items-center gap-2">
             <div className="absolute top-2 left-4 text-slate-700/30 text-5xl font-serif select-none">“</div>
-            <p className="text-slate-200 text-base md:text-lg italic font-medium relative z-10 leading-relaxed px-6">
-              {currentQuote}
+            <p className="text-slate-100 text-xl md:text-2xl italic font-semibold relative z-10 leading-relaxed px-6">
+              "{currentQuote}"
             </p>
             <div className="absolute bottom-2 right-4 text-slate-700/30 text-5xl font-serif select-none">”</div>
+          </div>
+        )}
+
+        {appliedCount >= 20 && !feedbackSubmitted && !feedbackSnoozed && (
+          <div className="glass-panel p-6 rounded-2xl border border-slate-800/60 relative overflow-hidden bg-slate-900/40 glow-indigo animate-fade-in flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 max-w-lg text-center md:text-left">
+              <h3 className="text-xl font-bold text-slate-100 bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-indigo-400">
+                Congratulations on {appliedCount} Applications! 🎉
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                You've successfully marked {appliedCount} opportunities as Applied. We would love to get your feedback and rating on our service!
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className="transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                    title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                  >
+                    <svg
+                      className={`w-8 h-8 ${rating >= star ? 'text-amber-400 fill-amber-400' : 'text-slate-600 hover:text-amber-300'}`}
+                      fill={rating >= star ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11.049 2.927c.3-.9 1.549-.9 1.84 0l1.817 5.597a1 1 0 00.95.69h5.89c.961 0 1.36 1.252.583 1.812l-4.764 3.461a1 1 0 00-.364 1.118l1.817 5.597c.3.9-.755 1.688-1.54 1.118l-4.764-3.461a1 1 0 00-1.18 0l-4.764 3.461c-.785.57-1.84-.219-1.54-1.118l1.817-5.597a1 1 0 00-.364-1.118L2.25 11.026c-.78-.56-.38-1.812.583-1.812h5.89a1 1 0 00.95-.69L11.05 2.928z"
+                      />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+
+              {rating > 0 && (
+                <div className="w-full md:w-80 flex flex-col gap-2 animate-fade-in mt-1">
+                  <textarea
+                    placeholder="Tell us what you like or how we can improve..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="w-full glass-input rounded-xl px-3 py-2 text-xs text-slate-200 h-16 resize-none"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setFeedbackSnoozed(true)}
+                      className="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 rounded-lg transition-all border border-slate-800 cursor-pointer"
+                    >
+                      Snooze
+                    </button>
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('apply_tracker_feedback_submitted', 'true');
+                        setFeedbackSubmitted(true);
+                        const subject = encodeURIComponent(`Apply Tracker Rating - ${rating} Stars`);
+                        const body = encodeURIComponent(`Rating: ${rating}/5 Stars\n\nComment: ${comment || 'No comment'}`);
+                        window.location.href = `mailto:itssmdsh@gmail.com?subject=${subject}&body=${body}`;
+                      }}
+                      className="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 font-bold rounded-lg text-white shadow transition-all active:scale-95 cursor-pointer"
+                    >
+                      Submit Feedback
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
