@@ -61,7 +61,15 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
               host.includes('courses.store') ||
               host.includes('topmate.io') ||
               host.includes('drive.google.com') ||
-              host.includes('leetcode.com')
+              host.includes('leetcode.com') ||
+              host.includes('youtube.com') || 
+              host.includes('youtu.be') ||
+              host.includes('whatsapp.com') ||
+              host.includes('wa.me') ||
+              host.includes('t.me') ||
+              host.includes('telegram.me') ||
+              host.includes('telegram.dog') ||
+              host.includes('telegram.org')
             ) {
               return false;
             }
