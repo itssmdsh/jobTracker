@@ -69,7 +69,8 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
               host.includes('t.me') ||
               host.includes('telegram.me') ||
               host.includes('telegram.dog') ||
-              host.includes('telegram.org')
+              host.includes('telegram.org') ||
+              ['facebook.com', 'fb.me', 'twitter.com', 'x.com', 'instagram.com', 'instagr.am', 'linkedin.com', 'pinterest.com', 'reddit.com'].some(d => host.includes(d))
             ) {
               return false;
             }

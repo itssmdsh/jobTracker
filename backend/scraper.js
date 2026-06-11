@@ -88,7 +88,7 @@ export function isSpamOrExcluded(link) {
       host.includes('telegram.me') ||
       host.includes('telegram.dog') ||
       host.includes('telegram.org') ||
-      ['facebook.com', 'twitter.com', 'instagram.com', 'linkedin.com'].some(d => host.includes(d))
+      ['facebook.com', 'fb.me', 'twitter.com', 'x.com', 'instagram.com', 'instagr.am', 'linkedin.com', 'pinterest.com', 'reddit.com'].some(d => host.includes(d))
     ) {
       return true;
     }
