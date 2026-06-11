@@ -44,7 +44,7 @@ export async function getChannelIdFromUrl(url) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9'
       },
-      timeout: 10000
+      timeout: 5000
     });
     
     const html = response.data;
@@ -132,7 +132,7 @@ async function scrapeYouTube(channelUrl, cutoffDate) {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
       },
-      timeout: 10000
+      timeout: 5000
     });
     
     const jsonObj = xmlParser.parse(response.data);
@@ -180,7 +180,7 @@ async function scrapeWebsite(url) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9'
       },
-      timeout: 10000
+      timeout: 5000
     });
     
     const $ = cheerio.load(response.data);
@@ -262,7 +262,7 @@ async function scrapeTelegramChannel(url, cutoffDate) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9'
       },
-      timeout: 10000
+      timeout: 5000
     });
     
     const $ = cheerio.load(response.data);
