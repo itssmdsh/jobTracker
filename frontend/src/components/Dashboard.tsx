@@ -156,6 +156,22 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
     }
   };
 
+  const handleRefresh = () => {
+    setLoading(true);
+    try {
+      const stored = localStorage.getItem('apply_tracker_links');
+      if (stored) {
+        setAllLinks(JSON.parse(stored));
+      } else {
+        setAllLinks([]);
+      }
+    } catch (e) {
+      console.error('Failed to parse links from localStorage', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleOpenLink = (link: ScrapedLink) => {
     window.open(link.url, '_blank', 'noopener,noreferrer');
 
@@ -216,6 +232,13 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
               title="Settings"
             >
               <SettingsIcon className="w-5 h-5 animate-spin-slow hover:animate-spin" style={{ animationDuration: '6s' }} />
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="p-3 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl border border-slate-800 transition-all duration-200 flex items-center justify-center"
+              title="Refresh Dashboard"
+            >
+              <RefreshCw className="w-5 h-5" />
             </button>
             <button
               onClick={handleClearAll}
