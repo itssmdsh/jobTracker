@@ -48,6 +48,7 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
     formData.append(import.meta.env.VITE_GOOGLE_FORM_YOP_ENTRY || 'entry.yop', profile.yop);
     formData.append(import.meta.env.VITE_GOOGLE_FORM_TECHSTACK_ENTRY || 'entry.techstack', profile.tech_stack);
     formData.append(import.meta.env.VITE_GOOGLE_FORM_DISCOVERY_ENTRY || 'entry.discovery', profile.discovery);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_CONFIRMATION_ENTRY || 'entry.confirmation', 'I Agree');
 
     try {
       await fetch(formUrl, {
