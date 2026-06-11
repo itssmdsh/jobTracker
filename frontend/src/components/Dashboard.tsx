@@ -80,6 +80,8 @@ const getCleanSourceName = (source: string | undefined, url: string): string => 
 
   if (!urlToParse) return 'Other/Unknown';
 
+  let rawName = 'Other/Unknown';
+
   try {
     const parsed = new URL(urlToParse);
     const host = parsed.hostname.toLowerCase().replace('www.', '');
@@ -88,51 +90,96 @@ const getCleanSourceName = (source: string | undefined, url: string): string => 
     if (host.includes('youtube.com') || host.includes('youtu.be')) {
       const handleMatch = parsed.pathname.match(/\/@([a-zA-Z0-9._-]+)/);
       if (handleMatch) {
-        return handleMatch[1];
-      }
-      const channelMatch = parsed.pathname.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
-      if (channelMatch) {
-        if (channelMatch[1] === 'UCcyogDO_BD5HS7YlySkTELQ') {
-          return 'Online Learning';
+        rawName = handleMatch[1];
+      } else {
+        const channelMatch = parsed.pathname.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
+        if (channelMatch) {
+          if (channelMatch[1] === 'UCcyogDO_BD5HS7YlySkTELQ') {
+            rawName = 'Online Learning';
+          } else {
+            rawName = `YouTube (${channelMatch[1].substring(0, 8)})`;
+          }
+        } else {
+          const pathParts = parsed.pathname.split('/').filter(Boolean);
+          if (pathParts.length > 0) {
+            const lastPart = pathParts[pathParts.length - 1];
+            if (lastPart !== 'watch' && lastPart !== 'videos') {
+              rawName = lastPart;
+            } else {
+              rawName = 'YouTube';
+            }
+          } else {
+            rawName = 'YouTube';
+          }
         }
-        return `YouTube (${channelMatch[1].substring(0, 8)}...)`;
       }
-      const pathParts = parsed.pathname.split('/').filter(Boolean);
-      if (pathParts.length > 0) {
-        const lastPart = pathParts[pathParts.length - 1];
-        if (lastPart !== 'watch' && lastPart !== 'videos') {
-          return lastPart;
-        }
-      }
-      return 'YouTube';
     }
-
     // Telegram channels
-    if (host.includes('t.me') || host.includes('telegram.me') || host.includes('telegram.dog')) {
+    else if (host.includes('t.me') || host.includes('telegram.me') || host.includes('telegram.dog')) {
       const pathParts = parsed.pathname.split('/').filter(Boolean);
       if (pathParts.length > 0) {
-        return pathParts[0];
+        rawName = pathParts[0];
+      } else {
+        rawName = 'Telegram';
       }
-      return 'Telegram';
     }
-
     // Google Forms
-    if (host === 'docs.google.com' && parsed.pathname.includes('/forms/')) {
-      return 'Google Forms';
+    else if (host === 'docs.google.com' && parsed.pathname.includes('/forms/')) {
+      rawName = 'Google Forms';
     }
-
     // General domains
-    return host;
+    else {
+      rawName = host;
+    }
   } catch (e) {
     if (urlToParse.startsWith('http://') || urlToParse.startsWith('https://')) {
       const parts = urlToParse.split('/');
       if (parts.length > 2) {
-        return parts[2].replace('www.', '');
+        rawName = parts[2].replace('www.', '');
       }
+    } else {
+      rawName = urlToParse || 'Other/Unknown';
     }
-    return urlToParse || 'Other/Unknown';
   }
+
+  // Normalize / Map clean names
+  const lowerName = rawName.toLowerCase();
+  
+  if (lowerName.includes('onlinestudy4u')) {
+    return 'Online Study 4 U';
+  }
+  if (lowerName.includes('hiremeplz')) {
+    return 'Hire Me Plz';
+  }
+  if (lowerName.includes('placementlelo')) {
+    return 'Placement Lelo';
+  }
+  if (lowerName.includes('freshershunt')) {
+    return 'Freshers Hunt';
+  }
+  if (lowerName.includes('studentsinternships')) {
+    return 'Students Internships';
+  }
+  if (lowerName.includes('jobs_and_internships_updates')) {
+    return 'Jobs & Internships Updates';
+  }
+  if (lowerName.includes('offcampussdrive') || lowerName.includes('offcampusdrive')) {
+    return 'Off Campus Drive';
+  }
+  if (lowerName.includes('jobcode')) {
+    return 'JobCode';
+  }
+  if (lowerName.includes('freshergo')) {
+    return 'FresherGo';
+  }
+  
+  if (rawName.includes('.')) {
+    return rawName.charAt(0).toUpperCase() + rawName.slice(1);
+  }
+
+  return rawName;
 };
+
 
 
 interface DashboardProps {
