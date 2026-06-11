@@ -523,32 +523,38 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
                     </button>
                     <button
                       onClick={async () => {
-                        const feedbackUrl = import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_URL;
+                        const feedbackUrl = import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_URL || 'https://docs.google.com/forms/d/e/1FAIpQLSdvz2KEy3zEsLw9RnTYbN1ShBuP6UgzQQ_QzaEQpx0a5mRwIw/formResponse';
                         
-                        if (feedbackUrl) {
-                          setSubmittingFeedback(true);
-                          try {
-                            const formData = new URLSearchParams();
-                            formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_RATING_ENTRY || 'entry.rating', rating.toString());
-                            formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_COMMENT_ENTRY || 'entry.comment', comment || '');
-                            formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_EMAIL_ENTRY || 'entry.email', settings.profile?.email || '');
-                            
-                            await fetch(feedbackUrl, {
-                              method: 'POST',
-                              mode: 'no-cors',
-                              headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                              },
-                              body: formData.toString(),
-                            });
-                            console.log('[Feedback Form] Submitted successfully.');
-                          } catch (err) {
-                            console.error('[Feedback Form] Failed to submit:', err);
-                          } finally {
-                            setSubmittingFeedback(false);
+                        setSubmittingFeedback(true);
+                        try {
+                          const formData = new URLSearchParams();
+                          formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_RATING_ENTRY || 'entry.1184290205', rating.toString());
+                          
+                          // Prepend user email to comment text since there is no separate email field
+                          const feedbackText = settings.profile?.email 
+                            ? `[User: ${settings.profile.email}] ${comment || 'No comment'}`
+                            : comment || 'No comment';
+                          
+                          formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_COMMENT_ENTRY || 'entry.1997358354', feedbackText);
+
+                          // Send to email entry if configured specifically in env
+                          if (import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_EMAIL_ENTRY) {
+                            formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_EMAIL_ENTRY, settings.profile?.email || '');
                           }
-                        } else {
-                          console.warn('[Feedback Form] VITE_GOOGLE_FORM_FEEDBACK_URL is not configured. Feedback saved locally.');
+                          
+                          await fetch(feedbackUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                              'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: formData.toString(),
+                          });
+                          console.log('[Feedback Form] Submitted successfully.');
+                        } catch (err) {
+                          console.error('[Feedback Form] Failed to submit:', err);
+                        } finally {
+                          setSubmittingFeedback(false);
                         }
 
                         localStorage.setItem('apply_tracker_feedback_submitted', 'true');
