@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import type { AppSettings, ScrapedLink } from '../types';
 import { 
   Search, 
@@ -9,7 +9,8 @@ import {
   Settings as SettingsIcon,
   Loader2,
   Globe,
-  Trash2
+  Trash2,
+  Mail
 } from 'lucide-react';
 import Modal from './Modal';
 import SettingsPane from './SettingsPane';
@@ -78,9 +79,15 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
           } catch (e) {
             return false;
           }
+        }).map(link => {
+          // Backward compatibility: ensure source field exists
+          if (!link.source) {
+            return { ...link, source: 'Other/Unknown' };
+          }
+          return link;
         });
         
-        if (cleaned.length !== parsed.length) {
+        if (cleaned.length !== parsed.length || parsed.some(p => !p.source)) {
           localStorage.setItem('apply_tracker_links', JSON.stringify(cleaned));
         }
         
@@ -131,7 +138,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
         let currentLinks: ScrapedLink[] = [];
         if (existingStored) {
           try {
-            currentLinks = JSON.parse(existingStored);
+            currentLinks = JSON.parse(existingStored).map((l: any) => l.source ? l : { ...l, source: 'Other/Unknown' });
           } catch (e) {
             console.error(e);
           }
@@ -143,13 +150,17 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
         
         let nextId = currentLinks.reduce((max, l) => l.id > max ? l.id : max, 0) + 1;
         
-        for (const url of data.links) {
+        for (const item of data.links) {
+          const url = typeof item === 'string' ? item : item.url;
+          const source = typeof item === 'string' ? 'Other/Unknown' : item.source || 'Other/Unknown';
+
           if (!existingUrls.has(url)) {
             newLinks.push({
               id: nextId++,
               url,
               status: 'Pending',
-              created_at: new Date().toISOString()
+              created_at: new Date().toISOString(),
+              source
             });
             addedCount++;
           }
@@ -234,6 +245,16 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
     setPendingLinkToMark(null);
   };
 
+  // Group filtered links by source
+  const groupedLinks: { [source: string]: ScrapedLink[] } = {};
+  filteredLinks.forEach(link => {
+    const src = link.source || 'Other/Unknown';
+    if (!groupedLinks[src]) {
+      groupedLinks[src] = [];
+    }
+    groupedLinks[src].push(link);
+  });
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 animate-fade-in">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -267,6 +288,13 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
             >
               <SettingsIcon className="w-5 h-5 animate-spin-slow hover:animate-spin" style={{ animationDuration: '6s' }} />
             </button>
+            <a
+              href="mailto:itssmdsh@gmail.com?subject=Apply Tracker Feedback"
+              className="p-3 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl border border-slate-800 transition-all duration-200 flex items-center justify-center animate-fade-in"
+              title="Send Feedback"
+            >
+              <Mail className="w-5 h-5" />
+            </a>
             <button
               onClick={handleRefresh}
               className="p-3 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl border border-slate-800 transition-all duration-200 flex items-center justify-center"
@@ -387,60 +415,72 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
                     </td>
                   </tr>
                 ) : (
-                  filteredLinks.map((link, index) => (
-                    <tr key={link.id} className="hover:bg-slate-900/30 transition-all duration-150 group">
-                      <td className="py-4 px-6 text-sm max-w-xs sm:max-w-md md:max-w-xl">
-                        <div className="flex items-center gap-3 font-medium">
-                          <span className="text-slate-500 font-mono text-xs w-6 text-right flex-shrink-0">
-                            {index + 1}.
-                          </span>
-                          <span className="truncate text-slate-300 select-all" title={link.url}>
-                            {link.url}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer ${
-                          link.status === 'Applied'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                        }`}
-                        onClick={() => handleUpdateStatus(link.id, link.status === 'Applied' ? 'Pending' : 'Applied')}
-                        title="Click to toggle status"
-                        >
-                          {link.status === 'Applied' ? (
-                            <>
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              Applied
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="w-3.5 h-3.5" />
-                              Pending
-                            </>
-                          )}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-right w-32">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleDeleteLink(link.id)}
-                            className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-900 rounded-lg transition-all"
-                            title="Delete link"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleOpenLink(link)}
-                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs flex items-center gap-1 transition-all duration-200 shadow shadow-indigo-600/20 active:scale-95"
-                            title="Open Link"
-                          >
-                            <span>Open</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                  Object.entries(groupedLinks).map(([source, sourceLinks]) => (
+                    <Fragment key={source}>
+                      <tr className="bg-slate-900/60 border-y border-slate-800/80">
+                        <td colSpan={3} className="py-2.5 px-6 text-xs font-bold text-indigo-400 uppercase tracking-wider bg-slate-900/40">
+                          Source: {source} ({sourceLinks.length} opportunities)
+                        </td>
+                      </tr>
+                      {sourceLinks.map((link) => {
+                        const globalIndex = filteredLinks.findIndex(l => l.id === link.id);
+                        return (
+                          <tr key={link.id} className="hover:bg-slate-900/30 transition-all duration-150 group">
+                            <td className="py-4 px-6 text-sm max-w-xs sm:max-w-md md:max-w-xl">
+                              <div className="flex items-center gap-3 font-medium">
+                                <span className="text-slate-500 font-mono text-xs w-6 text-right flex-shrink-0">
+                                  {globalIndex + 1}.
+                                </span>
+                                <span className="truncate text-slate-300 select-all" title={link.url}>
+                                  {link.url}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer ${
+                                link.status === 'Applied'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                              }`}
+                              onClick={() => handleUpdateStatus(link.id, link.status === 'Applied' ? 'Pending' : 'Applied')}
+                              title="Click to toggle status"
+                              >
+                                {link.status === 'Applied' ? (
+                                  <>
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    Applied
+                                  </>
+                                ) : (
+                                  <>
+                                    <Clock className="w-3.5 h-3.5" />
+                                    Pending
+                                  </>
+                                )}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-right w-32">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleDeleteLink(link.id)}
+                                  className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-900 rounded-lg transition-all"
+                                  title="Delete link"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleOpenLink(link)}
+                                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs flex items-center gap-1 transition-all duration-200 shadow shadow-indigo-600/20 active:scale-95"
+                                  title="Open Link"
+                                >
+                                  <span>Open</span>
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </Fragment>
                   ))
                 )}
               </tbody>

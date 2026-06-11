@@ -6,13 +6,18 @@ import Dashboard from './components/Dashboard';
 const DEFAULT_SETTINGS: AppSettings = {
   channels: [
     "https://jobcode.in/",
+    "https://freshergo.in/",
     "https://www.youtube.com/@OnlineStudy4u",
     "https://www.youtube.com/@hiremeplz",
     "https://www.youtube.com/channel/UCcyogDO_BD5HS7YlySkTELQ",
-    "https://telegram.me/PLACEMENTLELO"
+    "https://telegram.me/PLACEMENTLELO",
+    "https://t.me/freshershunt",
+    "https://t.me/studentsinternships",
+    "https://t.me/jobs_and_internships_updates",
+    "https://t.me/offcampussdrive"
   ],
-  frequency: "Daily",
-  daily_time: "09:00",
+  frequency: "Manual",
+  daily_time: "",
   auto_mark: "Yes",
   setup_completed: "false"
 };

@@ -11,4 +11,5 @@ export interface ScrapedLink {
   url: string;
   status: 'Pending' | 'Applied';
   created_at: string;
+  source: string;
 }

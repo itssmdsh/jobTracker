@@ -361,7 +361,7 @@ export async function runScraper(channels = [], timeframe = 'all') {
       }
       
       console.log(`[Scraper] Found ${urls.length} links for source ${channelUrl}`);
-      return urls;
+      return urls.map(u => ({ url: u, source: channelUrl }));
     } catch (err) {
       console.error(`[Scraper] Error scraping source ${channelUrl}:`, err.message);
       return [];
@@ -371,10 +371,18 @@ export async function runScraper(channels = [], timeframe = 'all') {
   // Run all scrapes in parallel
   const results = await Promise.all(scrapePromises);
   
-  // Flatten and deduplicate combined list
-  const allUrls = results.flat();
-  const uniqueUrls = [...new Set(allUrls)];
+  // Flatten and deduplicate combined list by URL
+  const allLinks = results.flat();
+  const seen = new Set();
+  const uniqueLinks = [];
   
-  console.log(`[Scraper] Scrape run complete. Found ${uniqueUrls.length} total unique links.`);
-  return uniqueUrls;
+  for (const item of allLinks) {
+    if (!seen.has(item.url)) {
+      seen.add(item.url);
+      uniqueLinks.push(item);
+    }
+  }
+  
+  console.log(`[Scraper] Scrape run complete. Found ${uniqueLinks.length} total unique links.`);
+  return uniqueLinks;
 }
