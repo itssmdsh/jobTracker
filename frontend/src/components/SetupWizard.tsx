@@ -117,7 +117,7 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 flex items-center justify-center animate-fade-in">
+    <div className="min-h-screen py-16 px-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 flex items-center justify-center animate-fade-in">
       <div className="w-full max-w-2xl space-y-6">
         
         {/* Main Form Bounding Box */}
@@ -129,9 +129,9 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
               Apply Tracker User Registration Form
             </h1>
             <div className="h-[1px] w-full bg-slate-800/80" />
-            <div className="space-y-3 text-slate-300 text-sm leading-relaxed font-medium">
+            <div className="space-y-3 text-slate-200 text-base leading-relaxed font-semibold">
               <p className="italic text-slate-400">Thank you for using Apply Tracker.</p>
-              <p className="text-slate-300">
+              <p className="text-slate-200">
                 This form helps us understand who is using the platform and which colleges, branches, and technology stacks are represented among our users. The information collected will be used only for platform analytics and improvement.
               </p>
             </div>
@@ -139,7 +139,7 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
         </div>
 
         {error && (
-          <div className="p-4 bg-red-950/50 border border-red-500/20 text-red-200 rounded-xl text-sm font-semibold animate-pulse">
+          <div className="p-4 bg-red-950/50 border border-red-500/20 text-red-200 rounded-xl text-base font-bold animate-pulse">
             {error}
           </div>
         )}
@@ -149,16 +149,16 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
           {/* SECTION 1: Personal Information */}
           <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
             <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
-              <User className="w-5 h-5 text-indigo-400" />
+              <User className="w-6 h-6 text-indigo-400" />
               <div>
-                <h2 className="text-lg font-bold text-slate-100 tracking-wide">Personal Information</h2>
-                <span className="text-xs text-slate-500 italic">Description (optional)</span>
+                <h2 className="text-xl font-extrabold text-slate-100 tracking-wide">Personal Information</h2>
+                <span className="text-xs text-slate-400 italic">Description (optional)</span>
               </div>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-bold text-slate-200 mb-2">
+                <label className="block text-base font-extrabold text-slate-100 mb-2.5">
                   Full Name : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
@@ -167,12 +167,12 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
                   placeholder="Your answer"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                  className="w-full glass-input rounded-xl px-5 py-3 text-base font-semibold text-white placeholder-slate-500 focus:border-indigo-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-200 mb-2">
+                <label className="block text-base font-extrabold text-slate-100 mb-2.5">
                   Email Address : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
@@ -181,7 +181,7 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
                   placeholder="Your answer"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                  className="w-full glass-input rounded-xl px-5 py-3 text-base font-semibold text-white placeholder-slate-500 focus:border-indigo-500 transition-colors"
                 />
               </div>
             </div>
@@ -190,16 +190,16 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
           {/* SECTION 2: Academic Information */}
           <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
             <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-indigo-400" />
+              <BookOpen className="w-6 h-6 text-indigo-400" />
               <div>
-                <h2 className="text-lg font-bold text-slate-100 tracking-wide">Academic Information</h2>
-                <span className="text-xs text-slate-500 italic">Description (optional)</span>
+                <h2 className="text-xl font-extrabold text-slate-100 tracking-wide">Academic Information</h2>
+                <span className="text-xs text-slate-400 italic">Description (optional)</span>
               </div>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-bold text-slate-200 mb-2">
+                <label className="block text-base font-extrabold text-slate-100 mb-2.5">
                   College / University Name : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
@@ -208,12 +208,12 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
                   placeholder="Your answer"
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                  className="w-full glass-input rounded-xl px-5 py-3 text-base font-semibold text-white placeholder-slate-500 focus:border-indigo-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-200 mb-2">
+                <label className="block text-base font-extrabold text-slate-100 mb-2.5">
                   Degree Program : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
@@ -222,12 +222,12 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
                   placeholder="Your answer (e.g. B.Tech, MCA, BCA)"
                   value={degree}
                   onChange={(e) => setDegree(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                  className="w-full glass-input rounded-xl px-5 py-3 text-base font-semibold text-white placeholder-slate-500 focus:border-indigo-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-200 mb-2">
+                <label className="block text-base font-extrabold text-slate-100 mb-2.5">
                   Branch / Specialization : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
@@ -236,30 +236,30 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
                   placeholder="Your answer (e.g. Computer Science, Information Technology)"
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                  className="w-full glass-input rounded-xl px-5 py-3 text-base font-semibold text-white placeholder-slate-500 focus:border-indigo-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-200 mb-2">
+                <label className="block text-base font-extrabold text-slate-100 mb-2.5">
                   Year of Passing (YOP) : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <select
                   required
                   value={yop}
                   onChange={(e) => setYop(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-300 bg-slate-950 cursor-pointer outline-none focus:border-indigo-500"
+                  className="w-full glass-input rounded-xl px-5 py-3 text-base font-semibold text-white bg-slate-950 cursor-pointer outline-none focus:border-indigo-500 transition-colors"
                   title="Select Year of Passing"
                 >
-                  <option value="" disabled className="text-slate-500">Choose year</option>
+                  <option value="" disabled className="text-slate-500 font-semibold bg-slate-950">Choose year</option>
                   {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
-                    <option key={year} value={year} className="bg-slate-950 text-slate-200">{year}</option>
+                    <option key={year} value={year} className="bg-slate-950 text-slate-200 font-semibold">{year}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-200 mb-2">
+                <label className="block text-base font-extrabold text-slate-100 mb-2.5">
                   Primary Tech Stack : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
@@ -268,7 +268,7 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
                   placeholder="Your answer (e.g. React, Node.js, Python)"
                   value={techStack}
                   onChange={(e) => setTechStack(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                  className="w-full glass-input rounded-xl px-5 py-3 text-base font-semibold text-white placeholder-slate-500 focus:border-indigo-500 transition-colors"
                 />
               </div>
             </div>
@@ -277,13 +277,15 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
           {/* SECTION 3: Discovery Source */}
           <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
             <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-lg font-bold text-slate-100 tracking-wide">How did you discover Apply Tracker? : <span className="text-red-500 font-bold">*</span></h2>
+              <HelpCircle className="w-6 h-6 text-indigo-400" />
+              <h2 className="text-xl font-extrabold text-slate-100 tracking-wide">
+                How did you discover Apply Tracker? : <span className="text-red-500 font-bold">*</span>
+              </h2>
             </div>
 
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               {['Friend / Referral', 'WhatsApp', 'Telegram', 'YouTube', 'LinkedIn', 'Other'].map((option) => (
-                <label key={option} className="flex items-center gap-3 cursor-pointer group">
+                <label key={option} className="flex items-center gap-3.5 cursor-pointer group">
                   <input
                     type="radio"
                     name="discovery"
@@ -291,23 +293,23 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
                     value={option}
                     checked={discovery === option}
                     onChange={(e) => setDiscovery(e.target.value)}
-                    className="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 focus:ring-indigo-500 focus:ring-offset-slate-950 focus:ring-2 cursor-pointer"
+                    className="w-5 h-5 text-indigo-600 bg-slate-900 border-slate-700 focus:ring-indigo-500 focus:ring-offset-slate-950 focus:ring-2 cursor-pointer"
                   />
-                  <span className="text-sm font-medium text-slate-300 group-hover:text-slate-100 transition-colors">
+                  <span className="text-base font-semibold text-slate-200 group-hover:text-slate-100 transition-colors">
                     {option}
                   </span>
                 </label>
               ))}
 
               {discovery === 'Other' && (
-                <div className="pl-7 mt-2 animate-fade-in">
+                <div className="pl-8 mt-2 animate-fade-in">
                   <input
                     type="text"
                     required
                     placeholder="Please specify..."
                     value={discoveryOther}
                     onChange={(e) => setDiscoveryOther(e.target.value)}
-                    className="w-full glass-input rounded-xl px-4 py-2 text-xs text-slate-200"
+                    className="w-full glass-input rounded-xl px-5 py-2.5 text-sm font-semibold text-white placeholder-slate-500 focus:border-indigo-500 transition-colors"
                   />
                 </div>
               )}
@@ -317,23 +319,23 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
           {/* SECTION 4: Confirmation Consent */}
           <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
             <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-lg font-bold text-slate-100 tracking-wide">Confirmation <span className="text-red-500 font-bold">*</span></h2>
+              <ShieldCheck className="w-6 h-6 text-indigo-400" />
+              <h2 className="text-xl font-extrabold text-slate-100 tracking-wide">Confirmation <span className="text-red-500 font-bold">*</span></h2>
             </div>
 
             <div className="space-y-4">
-              <p className="text-sm text-slate-300 leading-relaxed font-medium">
+              <p className="text-base text-slate-200 leading-relaxed font-semibold">
                 I consent to providing this information for platform analytics and improvement purposes.
               </p>
-              <label className="flex items-center gap-3 cursor-pointer group">
+              <label className="flex items-center gap-3.5 cursor-pointer group">
                 <input
                   type="checkbox"
                   required
                   checked={agree}
                   onChange={(e) => setAgree(e.target.checked)}
-                  className="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 rounded focus:ring-indigo-500 focus:ring-offset-slate-950 focus:ring-2 cursor-pointer"
+                  className="w-5 h-5 text-indigo-600 bg-slate-900 border-slate-700 rounded focus:ring-indigo-500 focus:ring-offset-slate-950 focus:ring-2 cursor-pointer"
                 />
-                <span className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors">
+                <span className="text-base font-extrabold text-white transition-colors">
                   I Agree
                 </span>
               </label>
@@ -344,11 +346,11 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl py-3.5 font-bold shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/35 transition-all flex items-center justify-center gap-2 border border-indigo-400/20 disabled:opacity-50 cursor-pointer active:scale-98 relative z-10"
+            className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl py-4 text-base font-black tracking-wider shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/35 transition-all flex items-center justify-center gap-2 border border-indigo-400/20 disabled:opacity-50 cursor-pointer active:scale-98 relative z-10"
           >
             {loading ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" /> Registering & Loading App...
+                <Loader2 className="w-6 h-6 animate-spin" /> Registering & Loading App...
               </>
             ) : (
               'Register & Start Tracking'

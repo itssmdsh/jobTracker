@@ -540,7 +540,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
             <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-indigo-400">
               Apply Tracker Dashboard
             </h1>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-slate-200 text-sm mt-1 font-semibold">
               {settings.profile ? `Welcome back, ${settings.profile.name} • ` : ''}Monitoring {settings.channels.length} sources • Local Storage Mode
             </p>
           </div>
@@ -606,7 +606,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="glass-panel p-6 rounded-2xl border border-slate-800/60 relative overflow-hidden flex items-center justify-between glow-indigo transition-transform duration-300 hover:scale-[1.02]">
             <div>
-              <p className="text-slate-400 text-sm font-semibold">Total Opportunities</p>
+              <p className="text-slate-200 text-sm font-bold">Total Opportunities</p>
               <h3 className="text-3xl font-black mt-2 text-slate-100">{totalCount}</h3>
             </div>
             <div className="p-4 bg-indigo-500/10 text-indigo-400 rounded-2xl">
@@ -616,7 +616,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
           
           <div className="glass-panel p-6 rounded-2xl border border-slate-800/60 relative overflow-hidden flex items-center justify-between transition-transform duration-300 hover:scale-[1.02]">
             <div>
-              <p className="text-slate-400 text-sm font-semibold">Pending</p>
+              <p className="text-slate-200 text-sm font-bold">Pending</p>
               <h3 className="text-3xl font-black mt-2 text-amber-400">{pendingCount}</h3>
             </div>
             <div className="p-4 bg-amber-500/10 text-amber-400 rounded-2xl">
@@ -626,7 +626,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
 
           <div className="glass-panel p-6 rounded-2xl border border-slate-800/60 relative overflow-hidden flex items-center justify-between glow-emerald transition-transform duration-300 hover:scale-[1.02]">
             <div>
-              <p className="text-slate-400 text-sm font-semibold">Applied</p>
+              <p className="text-slate-200 text-sm font-bold">Applied</p>
               <h3 className="text-3xl font-black mt-2 text-emerald-400">{appliedCount}</h3>
             </div>
             <div className="p-4 bg-emerald-500/10 text-emerald-400 rounded-2xl">
