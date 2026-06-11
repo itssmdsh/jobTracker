@@ -75,15 +75,13 @@ const getRandomQuote = () => {
   return MOTIVATIONAL_QUOTES[idx];
 };
 
-const getCleanSourceName = (source: string | undefined, url: string): string => {
-  const urlToParse = source && source !== 'Other/Unknown' ? source : url;
-
-  if (!urlToParse) return 'Other/Unknown';
+const getCleanSourceName = (source: string | undefined): string => {
+  if (!source || source === 'Other/Unknown') return 'Other/Unknown';
 
   let rawName = 'Other/Unknown';
 
   try {
-    const parsed = new URL(urlToParse);
+    const parsed = new URL(source);
     const host = parsed.hostname.toLowerCase().replace('www.', '');
 
     // YouTube channels
@@ -123,22 +121,18 @@ const getCleanSourceName = (source: string | undefined, url: string): string => 
         rawName = 'Telegram';
       }
     }
-    // Google Forms
-    else if (host === 'docs.google.com' && parsed.pathname.includes('/forms/')) {
-      rawName = 'Google Forms';
-    }
-    // General domains
+    // General domains / websites
     else {
       rawName = host;
     }
   } catch (e) {
-    if (urlToParse.startsWith('http://') || urlToParse.startsWith('https://')) {
-      const parts = urlToParse.split('/');
+    if (source.startsWith('http://') || source.startsWith('https://')) {
+      const parts = source.split('/');
       if (parts.length > 2) {
         rawName = parts[2].replace('www.', '');
       }
     } else {
-      rawName = urlToParse || 'Other/Unknown';
+      rawName = source || 'Other/Unknown';
     }
   }
 
@@ -422,7 +416,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   // Group filtered links by source
   const groupedLinks: { [source: string]: ScrapedLink[] } = {};
   filteredLinks.forEach(link => {
-    const src = getCleanSourceName(link.source, link.url);
+    const src = getCleanSourceName(link.source);
     if (!groupedLinks[src]) {
       groupedLinks[src] = [];
     }
@@ -434,12 +428,15 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
       <div className="max-w-6xl mx-auto space-y-8">
         
         {currentQuote && (
-          <div className="glass-panel p-5 rounded-2xl border border-slate-800/60 text-center relative overflow-hidden bg-slate-900/20 glow-indigo animate-fade-in flex flex-col justify-center items-center gap-2">
-            <div className="absolute top-2 left-4 text-slate-700/30 text-5xl font-serif select-none">“</div>
-            <p className="text-slate-100 text-xl md:text-2xl italic font-semibold relative z-10 leading-relaxed px-6">
+          <div className="glass-panel p-8 rounded-3xl border border-slate-800/60 text-center relative overflow-hidden bg-slate-900/35 glow-indigo animate-fade-in flex flex-col justify-center items-center gap-4">
+            <div className="absolute top-2 left-6 text-indigo-500/10 text-8xl font-serif select-none">“</div>
+            <p 
+              className="text-3xl sm:text-4xl md:text-5xl italic font-black relative z-10 leading-relaxed px-8 py-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-violet-300 tracking-tight"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
               "{currentQuote}"
             </p>
-            <div className="absolute bottom-2 right-4 text-slate-700/30 text-5xl font-serif select-none">”</div>
+            <div className="absolute bottom-2 right-6 text-indigo-500/10 text-8xl font-serif select-none">”</div>
           </div>
         )}
 
