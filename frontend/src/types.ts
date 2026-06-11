@@ -8,9 +8,12 @@ export interface AppSettings {
     name: string;
     email: string;
     college: string;
+    degree: string;
     branch: string;
     yop: string;
     tech_stack: string;
+    discovery: string;
+    consent: boolean;
   };
 }
 

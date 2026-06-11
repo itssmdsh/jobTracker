@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { AppSettings } from '../types';
-import { Plus, Trash2, Settings, Loader2, User, Globe, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Loader2, User, BookOpen, HelpCircle, ShieldCheck } from 'lucide-react';
 
 interface SetupWizardProps {
   initialSettings: AppSettings;
@@ -8,80 +8,30 @@ interface SetupWizardProps {
 }
 
 export default function SetupWizard({ initialSettings, onComplete }: SetupWizardProps) {
-  const [step, setStep] = useState<1 | 2>(1);
-  
-  // Step 1: Profile State
+  // Profile Fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [college, setCollege] = useState('');
+  const [degree, setDegree] = useState('');
   const [branch, setBranch] = useState('');
-  const [yop, setYop] = useState('2026'); // default year of passing
+  const [yop, setYop] = useState('');
   const [techStack, setTechStack] = useState('');
-
-  // Step 2: Sources State
-  const [channels, setChannels] = useState<string[]>(initialSettings.channels);
-  const [newChannel, setNewChannel] = useState('');
-  const [autoMark, setAutoMark] = useState<'Yes' | 'No'>(initialSettings.auto_mark);
+  const [discovery, setDiscovery] = useState('');
+  const [discoveryOther, setDiscoveryOther] = useState('');
+  const [agree, setAgree] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const handleAddChannel = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = newChannel.trim();
-    if (!trimmed) return;
-    
-    try {
-      new URL(trimmed);
-    } catch (_) {
-      if (!trimmed.startsWith('@')) {
-        setError('Please enter a valid URL (e.g. https://youtube.com/...) or channel handle (e.g. @channel)');
-        return;
-      }
-    }
-
-    if (channels.includes(trimmed)) {
-      setError('This channel/URL is already in the list.');
-      return;
-    }
-
-    setChannels([...channels, trimmed]);
-    setNewChannel('');
-    setError('');
-  };
-
-  const handleRemoveChannel = (index: number) => {
-    setChannels(channels.filter((_, i) => i !== index));
-  };
-
-  const validateStep1 = () => {
-    if (!name.trim()) return 'Name is required.';
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) return 'A valid email is required.';
-    if (!college.trim()) return 'College name is required.';
-    if (!branch.trim()) return 'Branch of study is required.';
-    if (!yop.trim()) return 'Year of passing is required.';
-    if (!techStack.trim()) return 'Tech stack is required.';
-    return '';
-  };
-
-  const handleNextStep = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const validationError = validateStep1();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setError('');
-    setStep(2);
-  };
 
   const submitToGoogleForm = async (profile: {
     name: string;
     email: string;
     college: string;
+    degree: string;
     branch: string;
     yop: string;
     tech_stack: string;
+    discovery: string;
   }) => {
     const formUrl = import.meta.env.VITE_GOOGLE_FORM_URL;
     if (!formUrl) {
@@ -93,9 +43,11 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
     formData.append(import.meta.env.VITE_GOOGLE_FORM_NAME_ENTRY || 'entry.name', profile.name);
     formData.append(import.meta.env.VITE_GOOGLE_FORM_EMAIL_ENTRY || 'entry.email', profile.email);
     formData.append(import.meta.env.VITE_GOOGLE_FORM_COLLEGE_ENTRY || 'entry.college', profile.college);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_DEGREE_ENTRY || 'entry.degree', profile.degree);
     formData.append(import.meta.env.VITE_GOOGLE_FORM_BRANCH_ENTRY || 'entry.branch', profile.branch);
     formData.append(import.meta.env.VITE_GOOGLE_FORM_YOP_ENTRY || 'entry.yop', profile.yop);
     formData.append(import.meta.env.VITE_GOOGLE_FORM_TECHSTACK_ENTRY || 'entry.techstack', profile.tech_stack);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_DISCOVERY_ENTRY || 'entry.discovery', profile.discovery);
 
     try {
       await fetch(formUrl, {
@@ -109,318 +61,298 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
       console.log('[Google Form Integration] Form submitted successfully.');
     } catch (err) {
       console.error('[Google Form Integration] Failed to submit form:', err);
-      // We log but don't block the user's setup if it is a network error (e.g. CORS block/no-cors opaque fallback is fine)
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Final check
-    const validationError = validateStep1();
-    if (validationError) {
-      setError(validationError);
-      setStep(1);
-      return;
-    }
+    // Validations
+    if (!name.trim()) return setError('Full Name is required.');
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) return setError('A valid Email Address is required.');
+    if (!college.trim()) return setError('College / University Name is required.');
+    if (!degree.trim()) return setError('Degree Program is required.');
+    if (!branch.trim()) return setError('Branch / Specialization is required.');
+    if (!yop) return setError('Year of Passing (YOP) is required.');
+    if (!techStack.trim()) return setError('Primary Tech Stack is required.');
+    if (!discovery) return setError('Please specify how you discovered Apply Tracker.');
+    if (discovery === 'Other' && !discoveryOther.trim()) return setError('Please specify details for "Other".');
+    if (!agree) return setError('You must agree and consent to proceed.');
 
-    if (channels.length === 0) {
-      setError('Please configure at least one channel or URL to monitor.');
-      return;
-    }
-    
     setLoading(true);
     setError('');
-    
+
     try {
+      const discoveryValue = discovery === 'Other' ? `Other: ${discoveryOther.trim()}` : discovery;
+      
       const profileData = {
         name: name.trim(),
         email: email.trim(),
         college: college.trim(),
+        degree: degree.trim(),
         branch: branch.trim(),
         yop,
         tech_stack: techStack.trim(),
+        discovery: discoveryValue,
+        consent: agree,
       };
 
-      // Submit to Google Form (runs asynchronously, ignores opaque response)
+      // Submit to Google Form asynchronously
       await submitToGoogleForm(profileData);
 
-      // Save to local storage
+      // Onboard the user with all default channels
       await onComplete({
-        channels,
+        channels: initialSettings.channels, // default channels list
         frequency: 'Manual',
         daily_time: '',
-        auto_mark: autoMark,
+        auto_mark: initialSettings.auto_mark,
         setup_completed: 'true',
         profile: profileData,
       });
     } catch (err: any) {
-      setError(err.message || 'Failed to save settings. Please try again.');
+      setError(err.message || 'Failed to submit registration. Please try again.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950">
-      <div className="w-full max-w-2xl glass-panel glow-indigo rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
-
-        {/* Wizard Header */}
-        <div className="flex items-center gap-3 mb-8 relative">
-          <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
-            <Settings className="w-8 h-8 animate-spin-slow" style={{ animationDuration: '8s' }} />
-          </div>
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-indigo-400">
-              Apply Tracker
+    <div className="min-h-screen py-12 px-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 flex items-center justify-center animate-fade-in">
+      <div className="w-full max-w-2xl space-y-6">
+        
+        {/* Main Form Bounding Box */}
+        <div className="glass-panel rounded-2xl border-t-[8px] border-t-indigo-600 border-x border-b border-slate-800/60 p-6 md:p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          
+          <div className="space-y-4">
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-100">
+              Apply Tracker User Registration Form
             </h1>
-            <p className="text-slate-400 text-sm">First-Time Setup Wizard</p>
-          </div>
-        </div>
-
-        {/* Steps Progress Indicator */}
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800/60 relative z-10">
-          <div className="flex items-center gap-2.5">
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step === 1 ? 'bg-indigo-600 text-white ring-4 ring-indigo-600/20' : 'bg-indigo-950 text-indigo-300'}`}>
-              1
-            </span>
-            <span className={`text-sm font-semibold transition-all ${step === 1 ? 'text-slate-100' : 'text-slate-500'}`}>
-              Student Profile
-            </span>
-          </div>
-          <div className="h-[1px] flex-1 mx-4 bg-slate-800"></div>
-          <div className="flex items-center gap-2.5">
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step === 2 ? 'bg-indigo-600 text-white ring-4 ring-indigo-600/20' : 'bg-indigo-950 text-indigo-300'}`}>
-              2
-            </span>
-            <span className={`text-sm font-semibold transition-all ${step === 2 ? 'text-slate-100' : 'text-slate-500'}`}>
-              Sources & Options
-            </span>
+            <div className="h-[1px] w-full bg-slate-800/80" />
+            <div className="space-y-3 text-slate-300 text-sm leading-relaxed font-medium">
+              <p className="italic text-slate-400">Thank you for using Apply Tracker.</p>
+              <p className="text-slate-300">
+                This form helps us understand who is using the platform and which colleges, branches, and technology stacks are represented among our users. The information collected will be used only for platform analytics and improvement.
+              </p>
+            </div>
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-950/50 border border-red-500/20 text-red-200 rounded-lg text-sm transition-all duration-200">
+          <div className="p-4 bg-red-950/50 border border-red-500/20 text-red-200 rounded-xl text-sm font-semibold animate-pulse">
             {error}
           </div>
         )}
 
-        {/* Multi-Step Form */}
-        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+        <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* STEP 1: Student Profile Form */}
-          {step === 1 && (
-            <div className="space-y-4 animate-fade-in">
-              <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2 mb-4">
-                <User className="w-5 h-5 text-indigo-400" /> Enter Your Profile Details
-              </h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Enter your name..."
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="Enter your email..."
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-              </div>
-
+          {/* SECTION 1: Personal Information */}
+          <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
+            <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
+              <User className="w-5 h-5 text-indigo-400" />
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                  College Name
+                <h2 className="text-lg font-bold text-slate-100 tracking-wide">Personal Information</h2>
+                <span className="text-xs text-slate-500 italic">Description (optional)</span>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  Full Name : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Enter your college/university name..."
+                  placeholder="Your answer"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  Email Address : <span className="text-red-500 font-bold">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="Your answer"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 2: Academic Information */}
+          <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
+            <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-indigo-400" />
+              <div>
+                <h2 className="text-lg font-bold text-slate-100 tracking-wide">Academic Information</h2>
+                <span className="text-xs text-slate-500 italic">Description (optional)</span>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  College / University Name : <span className="text-red-500 font-bold">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Your answer"
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-indigo-500 transition-colors"
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Branch / Specialization
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Computer Science..."
-                    value={branch}
-                    onChange={(e) => setBranch(e.target.value)}
-                    className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Year of Passing
-                  </label>
-                  <select
-                    value={yop}
-                    onChange={(e) => setYop(e.target.value)}
-                    className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-300 bg-slate-950 cursor-pointer focus:border-indigo-500 transition-colors outline-none"
-                    title="Select Year of Passing"
-                  >
-                    {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(yr => (
-                      <option key={yr} value={yr} className="bg-slate-950 text-slate-200">{yr}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                  Tech Stack
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  Degree Program : <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. React, Node.js, TypeScript, Python..."
-                  value={techStack}
-                  onChange={(e) => setTechStack(e.target.value)}
-                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-indigo-500 transition-colors"
+                  placeholder="Your answer (e.g. B.Tech, MCA, BCA)"
+                  value={degree}
+                  onChange={(e) => setDegree(e.target.value)}
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
                 />
               </div>
 
-              <button
-                type="button"
-                onClick={handleNextStep}
-                className="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-3 font-bold shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-              >
-                Next: Sources & Options <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {/* STEP 2: Sources Setup Form */}
-          {step === 2 && (
-            <div className="space-y-6 animate-fade-in">
-              <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-indigo-400" /> Configure Monitor Settings
-              </h2>
-              
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                  1. Which YouTube channels or website sources should be monitored?
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  Branch / Specialization : <span className="text-red-500 font-bold">*</span>
                 </label>
-                <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
-                  Enter channel URLs (e.g. <code className="text-indigo-300">https://youtube.com/@OnlineStudy4u</code>), handles, or custom websites (e.g. <code className="text-indigo-300">https://jobcode.in/</code>).
-                </p>
+                <input
+                  type="text"
+                  required
+                  placeholder="Your answer (e.g. Computer Science, Information Technology)"
+                  value={branch}
+                  onChange={(e) => setBranch(e.target.value)}
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                />
+              </div>
 
-                <div className="flex gap-2 mb-3">
+              <div>
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  Year of Passing (YOP) : <span className="text-red-500 font-bold">*</span>
+                </label>
+                <select
+                  required
+                  value={yop}
+                  onChange={(e) => setYop(e.target.value)}
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-300 bg-slate-950 cursor-pointer outline-none focus:border-indigo-500"
+                  title="Select Year of Passing"
+                >
+                  <option value="" disabled className="text-slate-500">Choose year</option>
+                  {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
+                    <option key={year} value={year} className="bg-slate-950 text-slate-200">{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  Primary Tech Stack : <span className="text-red-500 font-bold">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Your answer (e.g. React, Node.js, Python)"
+                  value={techStack}
+                  onChange={(e) => setTechStack(e.target.value)}
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 3: Discovery Source */}
+          <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
+            <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-indigo-400" />
+              <h2 className="text-lg font-bold text-slate-100 tracking-wide">How did you discover Apply Tracker? : <span className="text-red-500 font-bold">*</span></h2>
+            </div>
+
+            <div className="space-y-3.5">
+              {['Friend / Referral', 'WhatsApp', 'Telegram', 'YouTube', 'LinkedIn', 'Other'].map((option) => (
+                <label key={option} className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="discovery"
+                    required
+                    value={option}
+                    checked={discovery === option}
+                    onChange={(e) => setDiscovery(e.target.value)}
+                    className="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 focus:ring-indigo-500 focus:ring-offset-slate-950 focus:ring-2 cursor-pointer"
+                  />
+                  <span className="text-sm font-medium text-slate-300 group-hover:text-slate-100 transition-colors">
+                    {option}
+                  </span>
+                </label>
+              ))}
+
+              {discovery === 'Other' && (
+                <div className="pl-7 mt-2 animate-fade-in">
                   <input
                     type="text"
-                    placeholder="Enter channel URL or handle..."
-                    value={newChannel}
-                    onChange={(e) => setNewChannel(e.target.value)}
-                    className="flex-1 glass-input rounded-xl px-4 py-2.5 text-sm text-slate-200"
+                    required
+                    placeholder="Please specify..."
+                    value={discoveryOther}
+                    onChange={(e) => setDiscoveryOther(e.target.value)}
+                    className="w-full glass-input rounded-xl px-4 py-2 text-xs text-slate-200"
                   />
-                  <button
-                    type="button"
-                    onClick={handleAddChannel}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-4 py-2.5 flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer active:scale-95"
-                  >
-                    <Plus className="w-4 h-4" /> Add
-                  </button>
                 </div>
-
-                <div className="glass-input rounded-xl max-h-40 overflow-y-auto p-2 space-y-1">
-                  {channels.length === 0 ? (
-                    <p className="text-slate-500 text-xs py-4 text-center">No sources added yet.</p>
-                  ) : (
-                    channels.map((chan, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800/40 text-[11px]">
-                        <span className="text-slate-300 truncate max-w-[85%]">{chan}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveChannel(idx)}
-                          className="text-slate-500 hover:text-red-400 p-1 rounded transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <div className="max-w-md">
-                  <label className="block text-xs font-semibold text-slate-200 uppercase tracking-wider">
-                    2. Automatically mark links as Applied when opened?
-                  </label>
-                  <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                    When enabled, clicking a link will automatically mark it as "Applied". When disabled, you'll be prompted to mark it manually.
-                  </p>
-                </div>
-                <div className="flex gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
-                  {['Yes', 'No'].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setAutoMark(val as 'Yes' | 'No')}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                        autoMark === val
-                          ? 'bg-indigo-600 text-white shadow'
-                          : 'text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {val}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="flex-1 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold rounded-xl py-3 border border-slate-800 flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" /> Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-[2] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl py-3 font-bold shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 border border-indigo-400/20 disabled:opacity-50 cursor-pointer active:scale-98"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" /> Saving...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" /> Save and Start Tracking
-                    </>
-                  )}
-                </button>
-              </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* SECTION 4: Confirmation Consent */}
+          <div className="glass-panel rounded-2xl border border-slate-800/60 p-6 md:p-8 shadow-xl space-y-6">
+            <div className="border-b border-slate-800/80 pb-3 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-indigo-400" />
+              <h2 className="text-lg font-bold text-slate-100 tracking-wide">Confirmation <span className="text-red-500 font-bold">*</span></h2>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                I consent to providing this information for platform analytics and improvement purposes.
+              </p>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  required
+                  checked={agree}
+                  onChange={(e) => setAgree(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 rounded focus:ring-indigo-500 focus:ring-offset-slate-950 focus:ring-2 cursor-pointer"
+                />
+                <span className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors">
+                  I Agree
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl py-3.5 font-bold shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/35 transition-all flex items-center justify-center gap-2 border border-indigo-400/20 disabled:opacity-50 cursor-pointer active:scale-98 relative z-10"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> Registering & Loading App...
+              </>
+            ) : (
+              'Register & Start Tracking'
+            )}
+          </button>
 
         </form>
       </div>
