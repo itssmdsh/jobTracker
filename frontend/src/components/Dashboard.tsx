@@ -196,6 +196,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   const [feedbackSnoozed, setFeedbackSnoozed] = useState<boolean>(false);
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
   
   const [promptOpen, setPromptOpen] = useState(false);
   const [pendingLinkToMark, setPendingLinkToMark] = useState<ScrapedLink | null>(null);
@@ -521,16 +522,49 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
                       Snooze
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        const feedbackUrl = import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_URL;
+                        
+                        if (feedbackUrl) {
+                          setSubmittingFeedback(true);
+                          try {
+                            const formData = new URLSearchParams();
+                            formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_RATING_ENTRY || 'entry.rating', rating.toString());
+                            formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_COMMENT_ENTRY || 'entry.comment', comment || '');
+                            formData.append(import.meta.env.VITE_GOOGLE_FORM_FEEDBACK_EMAIL_ENTRY || 'entry.email', settings.profile?.email || '');
+                            
+                            await fetch(feedbackUrl, {
+                              method: 'POST',
+                              mode: 'no-cors',
+                              headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                              },
+                              body: formData.toString(),
+                            });
+                            console.log('[Feedback Form] Submitted successfully.');
+                          } catch (err) {
+                            console.error('[Feedback Form] Failed to submit:', err);
+                          } finally {
+                            setSubmittingFeedback(false);
+                          }
+                        } else {
+                          console.warn('[Feedback Form] VITE_GOOGLE_FORM_FEEDBACK_URL is not configured. Feedback saved locally.');
+                        }
+
                         localStorage.setItem('apply_tracker_feedback_submitted', 'true');
                         setFeedbackSubmitted(true);
-                        const subject = encodeURIComponent(`Apply Tracker Rating - ${rating} Stars`);
-                        const body = encodeURIComponent(`Rating: ${rating}/5 Stars\n\nComment: ${comment || 'No comment'}`);
-                        window.location.href = `mailto:itssmdsh@gmail.com?subject=${subject}&body=${body}`;
+                        alert('Thank you so much for your feedback!');
                       }}
-                      className="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 font-bold rounded-lg text-white shadow transition-all active:scale-95 cursor-pointer"
+                      disabled={submittingFeedback}
+                      className="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 font-bold rounded-lg text-white shadow transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1"
                     >
-                      Submit Feedback
+                      {submittingFeedback ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" /> Submitting...
+                        </>
+                      ) : (
+                        'Submit Feedback'
+                      )}
                     </button>
                   </div>
                 </div>
