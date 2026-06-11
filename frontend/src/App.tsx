@@ -5,10 +5,10 @@ import Dashboard from './components/Dashboard';
 
 const DEFAULT_SETTINGS: AppSettings = {
   channels: [
+    "https://jobcode.in/",
     "https://www.youtube.com/@OnlineStudy4u",
     "https://www.youtube.com/@hiremeplz",
     "https://www.youtube.com/channel/UCcyogDO_BD5HS7YlySkTELQ",
-    "https://jobcode.in/",
     "https://telegram.me/PLACEMENTLELO"
   ],
   frequency: "Daily",

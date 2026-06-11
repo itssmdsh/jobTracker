@@ -73,6 +73,41 @@ export async function getChannelIdFromUrl(url) {
   }
 }
 
+export function isSpamOrExcluded(link) {
+  try {
+    const parsed = new URL(link);
+    const host = parsed.hostname.toLowerCase();
+    
+    // 1. Exclude social networking, media, and chat/communication platform links
+    if (
+      host.includes('youtube.com') || 
+      host.includes('youtu.be') ||
+      host.includes('whatsapp.com') ||
+      host.includes('wa.me') ||
+      host.includes('t.me') ||
+      host.includes('telegram.me') ||
+      host.includes('telegram.dog') ||
+      host.includes('telegram.org') ||
+      ['facebook.com', 'twitter.com', 'instagram.com', 'linkedin.com'].some(d => host.includes(d))
+    ) {
+      return true;
+    }
+    
+    // 2. Exclude user-specified spam, affiliate, and promotion/course platforms
+    if (
+      host.includes('atsbasedresume.com') ||
+      host.includes('courses.store') ||
+      host.includes('topmate.io')
+    ) {
+      return true;
+    }
+    
+    return false;
+  } catch (e) {
+    return true; // Invalid URLs are excluded
+  }
+}
+
 // Regex to extract absolute URLs
 export function extractUrls(text) {
   if (!text) return [];
@@ -92,27 +127,8 @@ export function extractUrls(text) {
       link = link.slice(0, -1);
     }
     
-    try {
-      const parsed = new URL(link);
-      const host = parsed.hostname.toLowerCase();
-      
-      // Filter out YouTube links and social networking/communication platforms
-      if (
-        host.includes('youtube.com') || 
-        host.includes('youtu.be') ||
-        host.includes('whatsapp.com') ||
-        host.includes('wa.me') ||
-        host.includes('t.me') ||
-        host.includes('telegram.me') ||
-        host.includes('telegram.dog') ||
-        host.includes('telegram.org')
-      ) {
-        continue;
-      }
-      
+    if (!isSpamOrExcluded(link)) {
       urls.push(link);
-    } catch (e) {
-      // Invalid URL
     }
   }
   return [...new Set(urls)];
@@ -199,12 +215,8 @@ async function scrapeWebsite(url) {
             const targetDomain = parsed.hostname.replace('www.', '');
             const pathname = parsed.pathname.toLowerCase();
             
-            // Filter out YouTube, WhatsApp, and Telegram
-            if (
-              targetDomain.includes('youtube.com') || 
-              targetDomain.includes('youtu.be') ||
-              ['facebook.com', 'twitter.com', 'instagram.com', 'linkedin.com', 't.me', 'telegram.me', 'telegram.dog', 'telegram.org', 'whatsapp.com', 'wa.me'].some(d => targetDomain.includes(d))
-            ) {
+            // Filter out YouTube, WhatsApp, Telegram, and specified spam domains
+            if (isSpamOrExcluded(resolved)) {
               return;
             }
 
@@ -288,17 +300,8 @@ async function scrapeTelegramChannel(url, cutoffDate) {
             const parsed = new URL(resolved);
             const targetDomain = parsed.hostname.toLowerCase().replace('www.', '');
 
-            // Filter out YouTube, Telegram, and WhatsApp links
-            if (
-              targetDomain.includes('youtube.com') ||
-              targetDomain.includes('youtu.be') ||
-              targetDomain.includes('t.me') ||
-              targetDomain.includes('telegram.me') ||
-              targetDomain.includes('telegram.org') ||
-              targetDomain.includes('telegram.dog') ||
-              targetDomain.includes('whatsapp.com') ||
-              targetDomain.includes('wa.me')
-            ) {
+            // Filter out YouTube, WhatsApp, Telegram, and specified spam domains
+            if (isSpamOrExcluded(resolved)) {
               return;
             }
 
