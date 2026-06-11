@@ -33,6 +33,18 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   const [pendingLinkToMark, setPendingLinkToMark] = useState<ScrapedLink | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [onPasswordSuccess, setOnPasswordSuccess] = useState<() => void>(() => {});
+
+  const handleOpenSettings = () => {
+    setPasswordInput('');
+    setPasswordError('');
+    setOnPasswordSuccess(() => () => setSettingsOpen(true));
+    setPasswordOpen(true);
+  };
+
   // Load links from localStorage on mount
   useEffect(() => {
     try {
@@ -199,7 +211,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
               <option value="all" className="bg-slate-950 text-slate-200">All Recent</option>
             </select>
             <button
-              onClick={() => setSettingsOpen(true)}
+              onClick={handleOpenSettings}
               className="p-3 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl border border-slate-800 transition-all duration-200 flex items-center justify-center"
               title="Settings"
             >
@@ -395,6 +407,67 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
           onClose={() => setSettingsOpen(false)}
           onSave={onUpdateSettings}
         />
+
+        {passwordOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div 
+              className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity"
+              onClick={() => setPasswordOpen(false)}
+            />
+            
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (passwordInput === 'slowdown') {
+                  setPasswordOpen(false);
+                  onPasswordSuccess();
+                } else {
+                  setPasswordError('Incorrect password. Please try again.');
+                }
+              }}
+              className="w-full max-w-sm glass-panel rounded-2xl p-6 shadow-2xl relative z-10 border border-slate-800 animate-in fade-in zoom-in-95 duration-200"
+            >
+              <div className="text-center space-y-4">
+                <div className="w-12 h-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
+                  <SettingsIcon className="w-6 h-6 animate-pulse" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-100">Password Required</h3>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  Please enter the password to customize the channels and application settings.
+                </p>
+                
+                <input
+                  type="password"
+                  placeholder="Enter password..."
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-center text-slate-200"
+                  autoFocus
+                />
+                
+                {passwordError && (
+                  <p className="text-red-400 text-xs font-semibold">{passwordError}</p>
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setPasswordOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-slate-800/80 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 active:scale-95 transition-all"
+                >
+                  Confirm
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
         
       </div>
     </div>
