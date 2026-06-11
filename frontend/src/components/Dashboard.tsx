@@ -443,7 +443,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
 
             {/* The Quote itself */}
             <p 
-              className="text-3xl sm:text-4xl md:text-5xl italic font-black relative z-10 leading-relaxed px-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-violet-300 tracking-tight"
+              className="text-xl sm:text-2xl md:text-3xl italic font-black relative z-10 leading-relaxed px-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-violet-300 tracking-tight"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               "{currentQuote}"
@@ -541,7 +541,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
               Apply Tracker Dashboard
             </h1>
             <p className="text-slate-400 text-sm mt-1">
-              Monitoring {settings.channels.length} sources • Local Storage Mode
+              {settings.profile ? `Welcome back, ${settings.profile.name} • ` : ''}Monitoring {settings.channels.length} sources • Local Storage Mode
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
