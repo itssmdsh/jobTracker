@@ -287,6 +287,10 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   });
 
   const handleScrape = async () => {
+    if (!settings.profile) {
+      alert('You must complete the registration form before scraping.');
+      return;
+    }
     setScraping(true);
     try {
       const res = await fetch(`${API_BASE}/api/scrape`, {
@@ -587,7 +591,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
             </button>
             <button
               onClick={handleScrape}
-              disabled={scraping}
+              disabled={scraping || !settings.profile}
               className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl px-5 py-3 flex items-center gap-2 text-sm transition-all duration-200 shadow-lg shadow-indigo-600/25 active:scale-95 border border-indigo-500/30"
             >
               {scraping ? (

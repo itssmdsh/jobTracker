@@ -52,7 +52,7 @@ export default function App() {
     );
   }
 
-  if (settings.setup_completed === 'false') {
+  if (settings.setup_completed === 'false' || !settings.profile) {
     return (
       <SetupWizard
         initialSettings={settings}

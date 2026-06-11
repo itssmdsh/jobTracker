@@ -66,6 +66,7 @@ export default function SettingsPane({ isOpen, settings, onClose, onSave }: Sett
 
     try {
       await onSave({
+        ...settings,
         channels,
         frequency: 'Manual',
         daily_time: '',
