@@ -1,6 +1,7 @@
 {
   "name": "apply-tracker-monorepo",
   "version": "1.0.0",
+  "type": "module",
   "description": "Monorepo for Apply Tracker",
   "scripts": {
     "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
