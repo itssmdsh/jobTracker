@@ -33,22 +33,18 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
     tech_stack: string;
     discovery: string;
   }) => {
-    const formUrl = import.meta.env.VITE_GOOGLE_FORM_URL;
-    if (!formUrl) {
-      console.warn('[Google Form Integration] VITE_GOOGLE_FORM_URL is not set. Data will only be saved locally.');
-      return;
-    }
+    const formUrl = import.meta.env.VITE_GOOGLE_FORM_URL || 'https://docs.google.com/forms/d/e/1FAIpQLSc3Es-Djcvftvh8EFZON0ZHMI7gJmd9ZCrkqu3lzjvI4hZftg/formResponse';
 
     const formData = new URLSearchParams();
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_NAME_ENTRY || 'entry.name', profile.name);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_EMAIL_ENTRY || 'entry.email', profile.email);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_COLLEGE_ENTRY || 'entry.college', profile.college);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_DEGREE_ENTRY || 'entry.degree', profile.degree);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_BRANCH_ENTRY || 'entry.branch', profile.branch);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_YOP_ENTRY || 'entry.yop', profile.yop);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_TECHSTACK_ENTRY || 'entry.techstack', profile.tech_stack);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_DISCOVERY_ENTRY || 'entry.discovery', profile.discovery);
-    formData.append(import.meta.env.VITE_GOOGLE_FORM_CONFIRMATION_ENTRY || 'entry.confirmation', 'I Agree');
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_NAME_ENTRY || 'entry.1713974610', profile.name);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_EMAIL_ENTRY || 'entry.967371037', profile.email);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_COLLEGE_ENTRY || 'entry.376953620', profile.college);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_DEGREE_ENTRY || 'entry.1505402862', profile.degree);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_BRANCH_ENTRY || 'entry.692543096', profile.branch);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_YOP_ENTRY || 'entry.137863666', profile.yop);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_TECHSTACK_ENTRY || 'entry.1996115967', profile.tech_stack);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_DISCOVERY_ENTRY || 'entry.1540765479', profile.discovery);
+    formData.append(import.meta.env.VITE_GOOGLE_FORM_CONFIRMATION_ENTRY || 'entry.690298539', 'I Agree');
 
     try {
       await fetch(formUrl, {
@@ -358,6 +354,11 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
           </button>
 
         </form>
+
+        {/* Footer */}
+        <div className="pt-6 text-center text-xs text-slate-500 font-semibold">
+          Made with ❤️ by Mohammad
+        </div>
       </div>
     </div>
   );

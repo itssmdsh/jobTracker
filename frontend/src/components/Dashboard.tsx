@@ -846,6 +846,10 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
           </div>
         )}
         
+        {/* Footer */}
+        <footer className="pt-8 border-t border-slate-900/60 flex justify-center items-center text-xs text-slate-500 font-semibold">
+          Made with ❤️ by Mohammad
+        </footer>
       </div>
     </div>
   );
