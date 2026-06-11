@@ -75,6 +75,66 @@ const getRandomQuote = () => {
   return MOTIVATIONAL_QUOTES[idx];
 };
 
+const getCleanSourceName = (source: string | undefined, url: string): string => {
+  const urlToParse = source && source !== 'Other/Unknown' ? source : url;
+
+  if (!urlToParse) return 'Other/Unknown';
+
+  try {
+    const parsed = new URL(urlToParse);
+    const host = parsed.hostname.toLowerCase().replace('www.', '');
+
+    // YouTube channels
+    if (host.includes('youtube.com') || host.includes('youtu.be')) {
+      const handleMatch = parsed.pathname.match(/\/@([a-zA-Z0-9._-]+)/);
+      if (handleMatch) {
+        return handleMatch[1];
+      }
+      const channelMatch = parsed.pathname.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
+      if (channelMatch) {
+        if (channelMatch[1] === 'UCcyogDO_BD5HS7YlySkTELQ') {
+          return 'Online Learning';
+        }
+        return `YouTube (${channelMatch[1].substring(0, 8)}...)`;
+      }
+      const pathParts = parsed.pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0) {
+        const lastPart = pathParts[pathParts.length - 1];
+        if (lastPart !== 'watch' && lastPart !== 'videos') {
+          return lastPart;
+        }
+      }
+      return 'YouTube';
+    }
+
+    // Telegram channels
+    if (host.includes('t.me') || host.includes('telegram.me') || host.includes('telegram.dog')) {
+      const pathParts = parsed.pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0) {
+        return pathParts[0];
+      }
+      return 'Telegram';
+    }
+
+    // Google Forms
+    if (host === 'docs.google.com' && parsed.pathname.includes('/forms/')) {
+      return 'Google Forms';
+    }
+
+    // General domains
+    return host;
+  } catch (e) {
+    if (urlToParse.startsWith('http://') || urlToParse.startsWith('https://')) {
+      const parts = urlToParse.split('/');
+      if (parts.length > 2) {
+        return parts[2].replace('www.', '');
+      }
+    }
+    return urlToParse || 'Other/Unknown';
+  }
+};
+
+
 interface DashboardProps {
   settings: AppSettings;
   onUpdateSettings: (settings: AppSettings) => Promise<void>;
@@ -308,7 +368,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   // Group filtered links by source
   const groupedLinks: { [source: string]: ScrapedLink[] } = {};
   filteredLinks.forEach(link => {
-    const src = link.source || 'Other/Unknown';
+    const src = getCleanSourceName(link.source, link.url);
     if (!groupedLinks[src]) {
       groupedLinks[src] = [];
     }
