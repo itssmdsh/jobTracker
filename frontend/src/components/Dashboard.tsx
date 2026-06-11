@@ -50,7 +50,32 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
     try {
       const stored = localStorage.getItem('apply_tracker_links');
       if (stored) {
-        setAllLinks(JSON.parse(stored));
+        const parsed: ScrapedLink[] = JSON.parse(stored);
+        
+        // Exclude spam links dynamically to clean up any old local storage items
+        const cleaned = parsed.filter(link => {
+          try {
+            const host = new URL(link.url).hostname.toLowerCase();
+            if (
+              host.includes('atsbasedresume.com') ||
+              host.includes('courses.store') ||
+              host.includes('topmate.io') ||
+              host.includes('drive.google.com') ||
+              host.includes('leetcode.com')
+            ) {
+              return false;
+            }
+            return true;
+          } catch (e) {
+            return false;
+          }
+        });
+        
+        if (cleaned.length !== parsed.length) {
+          localStorage.setItem('apply_tracker_links', JSON.stringify(cleaned));
+        }
+        
+        setAllLinks(cleaned);
       }
     } catch (e) {
       console.error('Failed to parse links from localStorage', e);
