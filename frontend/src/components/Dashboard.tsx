@@ -428,15 +428,38 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
       <div className="max-w-6xl mx-auto space-y-8">
         
         {currentQuote && (
-          <div className="glass-panel p-8 rounded-3xl border border-slate-800/60 text-center relative overflow-hidden bg-slate-900/35 glow-indigo animate-fade-in flex flex-col justify-center items-center gap-4">
-            <div className="absolute top-2 left-6 text-indigo-500/10 text-8xl font-serif select-none">“</div>
+          <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-indigo-500/20 text-center relative overflow-hidden bg-slate-900/30 shadow-[0_0_50px_-12px_rgba(99,102,241,0.2)] animate-fade-in flex flex-col justify-center items-center gap-6">
+            {/* Top decorative line and quote mark */}
+            <div className="flex items-center justify-center gap-4 w-full max-w-lg">
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-indigo-500/40"></div>
+              <span 
+                className="text-indigo-400 text-5xl font-serif select-none leading-none -mb-3"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                “
+              </span>
+              <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-indigo-500/40"></div>
+            </div>
+
+            {/* The Quote itself */}
             <p 
-              className="text-3xl sm:text-4xl md:text-5xl italic font-black relative z-10 leading-relaxed px-8 py-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-violet-300 tracking-tight"
+              className="text-3xl sm:text-4xl md:text-5xl italic font-black relative z-10 leading-relaxed px-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-white to-violet-300 tracking-tight"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               "{currentQuote}"
             </p>
-            <div className="absolute bottom-2 right-6 text-indigo-500/10 text-8xl font-serif select-none">”</div>
+
+            {/* Bottom decorative line and quote mark */}
+            <div className="flex items-center justify-center gap-4 w-full max-w-lg">
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-violet-500/40"></div>
+              <span 
+                className="text-violet-400 text-5xl font-serif select-none leading-none -mt-3"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                ”
+              </span>
+              <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-violet-500/40"></div>
+            </div>
           </div>
         )}
 
