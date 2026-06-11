@@ -17,6 +17,64 @@ import SettingsPane from './SettingsPane';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
 
+const MOTIVATIONAL_QUOTES = [
+  "You miss 100% of the shots you don't take. — Wayne Gretzky",
+  "Nothing changes if nothing changes.",
+  "Doing the thing is doing the thing.",
+  "Time cannot be recovered.",
+  "The best time to plant a tree was 20 years ago. The second best time is now.",
+  "Action is the foundational key to all success. — Pablo Picasso",
+  "Focus on being productive instead of busy. — Tim Ferriss",
+  "If you want something you've never had, you must be willing to do something you've never done.",
+  "Your time is limited, so don't waste it living someone else's life. — Steve Jobs",
+  "The secret of getting ahead is getting started. — Mark Twain",
+  "It always seems impossible until it's done. — Nelson Mandela",
+  "Opportunities don't happen, you create them. — Chris Grosser",
+  "Start where you are. Use what you have. Do what you can. — Arthur Ashe",
+  "Don't count the days, make the days count. — Muhammad Ali",
+  "Consistency is what transforms average into excellence.",
+  "Do something today that your future self will thank you for.",
+  "The only limit to our realization of tomorrow will be our doubts of today. — Franklin D. Roosevelt",
+  "Don't wait. The time will never be just right. — Napoleon Hill",
+  "Hustle beats talent when talent doesn't hustle.",
+  "Great things are done by a series of small things brought together. — Vincent Van Gogh",
+  "Make each day your masterpiece. — John Wooden",
+  "You don't have to be great to start, but you have to start to be great. — Zig Ziglar",
+  "A year from now you may wish you had started today. — Karen Lamb",
+  "Stop talking. Start doing.",
+  "Dream big. Start small. Act now.",
+  "One day or day one. You decide.",
+  "The path to success is to take massive, determined action. — Tony Robbins",
+  "Do not wait for extraordinary circumstances to do good; try to use ordinary situations. — Charles Richter",
+  "Procrastination is the thief of time. — Edward Young",
+  "Do the hard jobs first. The easy jobs will take care of themselves. — Dale Carnegie",
+  "I attribute my success to this: I never gave or took any excuse. — Florence Nightingale",
+  "Yesterday you said tomorrow. Just do it.",
+  "You can have results or excuses. Not both.",
+  "Energy and persistence conquer all things. — Benjamin Franklin",
+  "Action speaks louder than intention.",
+  "Efficiency is doing things right; effectiveness is doing the right things. — Peter Drucker",
+  "Don't watch the clock; do what it does. Keep going. — Sam Levenson",
+  "Well begun is half done. — Aristotle",
+  "Either you run the day, or the day runs you. — Jim Rohn",
+  "It is not enough to aim, you must hit. — Italian Proverb",
+  "Small daily improvements over time lead to stunning results. — Robin Sharma",
+  "Act as if what you do makes a difference. It does. — William James",
+  "Amateurs sit and wait for inspiration, the rest of us just get up and go to work. — Stephen King",
+  "If you are working on something that you really care about, you don't have to be pushed. The vision pulls you. — Steve Jobs",
+  "You are what you repeatedly do. Excellence, then, is not an act, but a habit. — Aristotle",
+  "Definiteness of purpose is the starting point of all achievement. — W. Clement Stone",
+  "The best way to predict your future is to create it. — Abraham Lincoln",
+  "Success is nothing more than a few simple disciplines, practiced every day. — Jim Rohn",
+  "Do not let what you cannot do interfere with what you can do. — John Wooden",
+  "Your life does not get better by chance, it gets better by change."
+];
+
+const getRandomQuote = () => {
+  const idx = Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length);
+  return MOTIVATIONAL_QUOTES[idx];
+};
+
 interface DashboardProps {
   settings: AppSettings;
   onUpdateSettings: (settings: AppSettings) => Promise<void>;
@@ -29,6 +87,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Applied'>('All');
   const [scrapeTimeframe, setScrapeTimeframe] = useState('24h');
+  const [currentQuote, setCurrentQuote] = useState(getRandomQuote);
   
   const [promptOpen, setPromptOpen] = useState(false);
   const [pendingLinkToMark, setPendingLinkToMark] = useState<ScrapedLink | null>(null);
@@ -202,6 +261,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
   };
 
   const handleRefresh = () => {
+    setCurrentQuote(getRandomQuote());
     setLoading(true);
     try {
       const stored = localStorage.getItem('apply_tracker_links');
@@ -259,6 +319,16 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 animate-fade-in">
       <div className="max-w-6xl mx-auto space-y-8">
         
+        {currentQuote && (
+          <div className="glass-panel p-5 rounded-2xl border border-slate-800/60 text-center relative overflow-hidden bg-slate-900/20 glow-indigo animate-fade-in flex flex-col justify-center items-center gap-2">
+            <div className="absolute top-2 left-4 text-slate-700/30 text-5xl font-serif select-none">“</div>
+            <p className="text-slate-200 text-base md:text-lg italic font-medium relative z-10 leading-relaxed px-6">
+              {currentQuote}
+            </p>
+            <div className="absolute bottom-2 right-4 text-slate-700/30 text-5xl font-serif select-none">”</div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60 glass-panel">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-indigo-400">
