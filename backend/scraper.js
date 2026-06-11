@@ -98,7 +98,8 @@ export function isSpamOrExcluded(link) {
       host.includes('atsbasedresume.com') ||
       host.includes('courses.store') ||
       host.includes('topmate.io') ||
-      host.includes('drive.google.com')
+      host.includes('drive.google.com') ||
+      host.includes('leetcode.com')
     ) {
       return true;
     }
