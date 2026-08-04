@@ -428,6 +428,24 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
     groupedLinks[src].push(link);
   });
 
+  // Sort sources customly: "Online Study 4 U" / "Online Learning" first, "JobCode" second, others alphabetically
+  const sortedGroupedEntries = Object.entries(groupedLinks).sort(([srcA], [srcB]) => {
+    const nameA = srcA.toLowerCase();
+    const nameB = srcB.toLowerCase();
+    
+    const isOnlineA = nameA.includes('online learning') || nameA.includes('online study');
+    const isOnlineB = nameB.includes('online learning') || nameB.includes('online study');
+    if (isOnlineA && !isOnlineB) return -1;
+    if (!isOnlineA && isOnlineB) return 1;
+    
+    const isJobCodeA = nameA.includes('jobcode');
+    const isJobCodeB = nameB.includes('jobcode');
+    if (isJobCodeA && !isJobCodeB) return -1;
+    if (!isJobCodeA && isJobCodeB) return 1;
+    
+    return srcA.localeCompare(srcB);
+  });
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 animate-fade-in">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -735,7 +753,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
                     </td>
                   </tr>
                 ) : (
-                  Object.entries(groupedLinks).map(([source, sourceLinks]) => (
+                  sortedGroupedEntries.map(([source, sourceLinks]) => (
                     <Fragment key={source}>
                       <tr className="bg-slate-900/60 border-y border-slate-800/80">
                         <td colSpan={3} className="py-2.5 px-6 text-xs font-bold text-indigo-400 uppercase tracking-wider bg-slate-900/40">

@@ -90,8 +90,13 @@ VITE_GOOGLE_FORM_CONFIRMATION_ENTRY=entry.690298539
 VITE_GOOGLE_FORM_FEEDBACK_URL=https://docs.google.com/forms/d/e/YOUR_FEEDBACK_FORM_ID/formResponse
 VITE_GOOGLE_FORM_FEEDBACK_RATING_ENTRY=entry.1184290205
 VITE_GOOGLE_FORM_FEEDBACK_COMMENT_ENTRY=entry.1997358354
+
+# Supabase URL Translation Config (Backend Server Env Vars)
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_KEY=your-supabase-anon-or-service-role-key
+SUPABASE_TABLE_NAME=links
 ```
-*(Note: If environment variables are omitted, the application will default to built-in fallbacks matching your default Google Forms, making it fully functional out-of-the-box.)*
+*(Note: If Google Form environment variables are omitted, the application will default to built-in fallbacks matching your default Google Forms, making it fully functional out-of-the-box. If Supabase variables are omitted, the scraper will simply return the original source URLs without mapping translation.)*
 
 ### 3. Run Locally in Development
 Start both backend API server and frontend Vite development server in parallel:
