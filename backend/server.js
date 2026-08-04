@@ -11,6 +11,58 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Translate existing URLs via Supabase mapping table
+app.post('/api/translate-links', async (req, res) => {
+  try {
+    const { urls } = req.body || {};
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      return res.status(400).json({ error: 'Invalid or missing "urls" array in request body.' });
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY;
+    const tableName = process.env.SUPABASE_TABLE_NAME || 'links';
+
+    if (!supabaseUrl || !supabaseKey) {
+      return res.json({ mappings: {} });
+    }
+
+    const batchSize = 30;
+    const mappings = {};
+
+    for (let i = 0; i < urls.length; i += batchSize) {
+      const batchUrls = urls.slice(i, i + batchSize);
+      const filterStr = batchUrls.map(u => `"${u.replace(/"/g, '\\"')}"`).join(',');
+
+      const response = await axios.get(`${supabaseUrl}/rest/v1/${tableName}`, {
+        params: {
+          select: 'source_url,apply_url',
+          source_url: `in.(${filterStr})`
+        },
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`
+        },
+        timeout: 8000
+      });
+
+      if (Array.isArray(response.data)) {
+        for (const row of response.data) {
+          if (row.source_url && row.apply_url) {
+            mappings[row.source_url] = row.apply_url;
+          }
+        }
+      }
+    }
+
+    console.log(`[Translate] Translated ${Object.keys(mappings).length} of ${urls.length} URLs.`);
+    res.json({ mappings });
+  } catch (error) {
+    console.error('[Translate] Failed:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Stateless Scrape API
 app.post('/api/scrape', async (req, res) => {
   try {

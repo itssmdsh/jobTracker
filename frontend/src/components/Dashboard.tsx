@@ -214,15 +214,20 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
     setPasswordOpen(true);
   };
 
-  // Load links from localStorage on mount
+  // Load links from localStorage on mount, then retroactively translate old source URLs
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('apply_tracker_links');
-      if (stored) {
+    const loadAndTranslate = async () => {
+      try {
+        const stored = localStorage.getItem('apply_tracker_links');
+        if (!stored) {
+          setLoading(false);
+          return;
+        }
+
         const parsed: ScrapedLink[] = JSON.parse(stored);
-        
+
         // Exclude spam links dynamically to clean up any old local storage items
-        const cleaned = parsed.filter(link => {
+        let cleaned = parsed.filter(link => {
           try {
             const host = new URL(link.url).hostname.toLowerCase();
             if (
@@ -231,7 +236,7 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
               host.includes('topmate.io') ||
               host.includes('drive.google.com') ||
               host.includes('leetcode.com') ||
-              host.includes('youtube.com') || 
+              host.includes('youtube.com') ||
               host.includes('youtu.be') ||
               host.includes('whatsapp.com') ||
               host.includes('wa.me') ||
@@ -254,18 +259,53 @@ export default function Dashboard({ settings, onUpdateSettings }: DashboardProps
           }
           return link;
         });
-        
-        if (cleaned.length !== parsed.length || parsed.some(p => !p.source)) {
-          localStorage.setItem('apply_tracker_links', JSON.stringify(cleaned));
+
+        // Retroactively translate old URLs (e.g. jobcode.in) using Supabase mapping
+        try {
+          const urlsToTranslate = cleaned.map(l => l.url);
+          if (urlsToTranslate.length > 0) {
+            const translateRes = await fetch(`${API_BASE}/api/translate-links`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ urls: urlsToTranslate })
+            });
+            if (translateRes.ok) {
+              const translateData = await translateRes.json();
+              const mappings: Record<string, string> = translateData.mappings || {};
+              if (Object.keys(mappings).length > 0) {
+                let translatedCount = 0;
+                cleaned = cleaned.map(link => {
+                  if (mappings[link.url]) {
+                    translatedCount++;
+                    return { ...link, url: mappings[link.url] };
+                  }
+                  return link;
+                });
+                // Deduplicate after translation (translated URLs may now match existing ones)
+                const seenUrls = new Set<string>();
+                cleaned = cleaned.filter(link => {
+                  if (seenUrls.has(link.url)) return false;
+                  seenUrls.add(link.url);
+                  return true;
+                });
+                console.log(`[Dashboard] Translated ${translatedCount} existing links to apply URLs.`);
+              }
+            }
+          }
+        } catch (translateErr) {
+          console.warn('[Dashboard] Could not translate existing links:', translateErr);
         }
-        
+
+        localStorage.setItem('apply_tracker_links', JSON.stringify(cleaned));
         setAllLinks(cleaned);
+      } catch (e) {
+        console.error('Failed to parse links from localStorage', e);
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error('Failed to parse links from localStorage', e);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadAndTranslate();
   }, []);
 
   // Compute counts
